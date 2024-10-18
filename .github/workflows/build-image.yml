@@ -98,7 +98,7 @@
 
 
 
-name: Build container Image
+name: Build and Push Container Image
 
 on:
   push:
@@ -106,30 +106,34 @@ on:
       - main
 
 jobs:
-  deploy:
-    runs-on: "ubuntu-latest"
+  build-and-push:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write  # Allow writing to package registry
-    
+      packages: write
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Get the version
-        id: get_version
-        run: echo "tag=$(echo ${GITHUB_SHA:0:8})" >> $GITHUB_ENV
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Authenticate
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build latest image
-        run: |
-          docker build \
-            --build-arg VERSION=${{ steps.get_version.outputs.tag }} \
-            --build-arg COMMIT=${GITHUB_SHA} \
-            -t ghcr.io/${{ github.repository }}:${{ env.tag }} .
-
-      - name: Push
-        run: |
-          docker push ghcr.io/${{ github.repository }}:${{ env.tag }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+          build-args: |
+            VERSION=${{ github.sha }}
+            COMMIT=${{ github.sha }}
