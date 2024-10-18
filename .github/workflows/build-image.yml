@@ -108,6 +108,9 @@ on:
 jobs:
   deploy:
     runs-on: "ubuntu-latest"
+    permissions:
+      contents: read
+      packages: write  # Allow writing to package registry
     
     steps:
       - name: Checkout code
