@@ -15,7 +15,7 @@ this Docker image is based on Debian and includes the ``` perf ```  utility, des
 
 start the container in a privileged mode, run:
 
-``docker run --name perf-utils --privileged -p 8080:80 -d muuta/perfutils``
+``docker run --name perf-utils --privileged -p 8080:80 -d -e ENV_VAR_NAME=value muuta/perfutils``
 
 ### Accessing the Container
 
@@ -45,7 +45,9 @@ output:
 ![output8](https://github.com/user-attachments/assets/c30d72a9-bce3-4a89-9795-ab4c7ddbdb07)
 
 
-Feel free to customize this image by adding additional utilities or configurations as needed. Simply modify the Dockerfile to install any required packages or dependencies. cheers 
+Feel free to customize this image by adding additional utilities or configurations as needed. Simply modify the Dockerfile to install any required packages or dependencies. 
+
+cheers!!! 
 
 
 
