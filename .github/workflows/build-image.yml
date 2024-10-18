@@ -98,37 +98,35 @@
 
 
 
+name: Build container Image
+
 on:
   push:
     branches:
       - main
-name: Build container Image
+
 jobs:
   deploy:
     runs-on: "ubuntu-latest"
+    
     steps:
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=tag::$(echo ${GITHUB_SHA:8})
-
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Get the version
+        id: get_version
+        run: echo "tag=$(echo ${GITHUB_SHA:0:8})" >> $GITHUB_ENV
+
       - name: Authenticate
-        uses: actions-hub/docker/login@master
-        env:
-          DOCKER_USERNAME: triplemcoder14
-          DOCKER_REGISTRY_URL: ghcr.io
-          DOCKER_PASSWORD: ${{ github.token }}
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build latest image
         run: |
           docker build \
-            --build-arg VERSION=${GITHUB_SHA::8} \
+            --build-arg VERSION=${{ steps.get_version.outputs.tag }} \
             --build-arg COMMIT=${GITHUB_SHA} \
-            -t ghcr.io/${GITHUB_REPOSITORY}:${{ steps.get_version.outputs.tag }} .
+            -t ghcr.io/${{ github.repository }}:${{ env.tag }} .
 
       - name: Push
-        uses: actions-hub/docker@master
-        with:
-          args: push ghcr.io/${GITHUB_REPOSITORY}:${{ steps.get_version.outputs.tag }}
+        run: |
+          docker push ghcr.io/${{ github.repository }}:${{ env.tag }}
