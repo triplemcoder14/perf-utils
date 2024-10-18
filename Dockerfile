@@ -1,6 +1,6 @@
 FROM debian:bullseye-slim
 
-MAINTAINER Muutassim-Mukhtar 
+MAINTAINER Muutassim-Mukhtar <mukhy16@gmail.com>
 
 WORKDIR /var/www/app
 
@@ -42,7 +42,7 @@ RUN set -x \
     apt-get update && apt-get build-dep -y $nginxPackages && \
     apt-get install -y $nginxPackages
 
-COPY conf/nginx.conf /etc/nginx/sites-available/default
+COPY config/nginx.conf /etc/nginx/sites-available/default
 
 # Expose port 80
 EXPOSE 80
