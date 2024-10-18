@@ -5,13 +5,14 @@ MAINTAINER Muutassim-Mukhtar <mukhy16@gmail.com>
 WORKDIR /var/www/app
 
 # Install necessary packages
-RUN apt-get update && apt-get install -y wget xz-utils make python3
+RUN apt-get update && apt-get install -y wget xz-utils make python3 curl gnupg2 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Download and install Linux tools
-RUN LINUX_NUM=$(uname -r | cut -d'.' -f1) && \
-    LINUX_VER=$(uname -r | cut -d'.' -f1-3 | cut -d'-' -f1) && \
-    wget "https://cdn.kernel.org/pub/linux/kernel/v$LINUX_NUM.x/linux-$LINUX_VER.tar.xz" && \
-    tar -xf "./linux-$LINUX_VER.tar.xz" && cd "linux-$LINUX_VER/tools/perf/" && \
+# Download and install Linux kernel tools
+RUN LINUX_VER="5.15.127" && \
+    wget "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-$LINUX_VER.tar.xz" && \
+    tar -xf "./linux-$LINUX_VER.tar.xz" && \
+    cd "linux-$LINUX_VER/tools/perf/" && \
     apt-get update && apt-get install -y python3-dev flex bison ocaml \ 
         libelf-dev libdw-dev systemtap-sdt-dev libunwind-dev \
         libperl-dev binutils-dev libzstd-dev libcap-dev \
@@ -21,26 +22,14 @@ RUN LINUX_NUM=$(uname -r | cut -d'.' -f1) && \
     cd / && rm -rf "linux-$LINUX_VER" "linux-$LINUX_VER.tar.xz"  # Clean up
 
 # Install Nginx with debug symbols
-RUN set -x \
-    && apt-get update \
-    && apt-get install --no-install-recommends --no-install-suggests -y gnupg1 \
-    && NGINX_GPGKEY=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62; \
-    found=''; \
-    for server in \
-        ha.pool.sks-keyservers.net \
-        hkp://keyserver.ubuntu.com:80 \
-        hkp://p80.pool.sks-keyservers.net:80 \
-        pgp.mit.edu \
-    ; do \
-        echo "Fetching GPG key $NGINX_GPGKEY from $server"; \
-        apt-key adv --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$NGINX_GPGKEY" && found=yes && break; \
-    done; \
-    test -z "$found" && echo >&2 "error: failed to fetch GPG key $NGINX_GPGKEY" && exit 1; \
-    nginxPackages="nginx nginx-dbg" && \
-    echo "deb http://nginx.org/packages/mainline/debian/ bullseye nginx" >> /etc/apt/sources.list && \
-    echo "deb-src http://nginx.org/packages/mainline/debian/ bullseye nginx" >> /etc/apt/sources.list && \
-    apt-get update && apt-get build-dep -y $nginxPackages && \
-    apt-get install -y $nginxPackages
+RUN set -ex && \
+    curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor -o /usr/share/keyrings/nginx-archive-keyring.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/mainline/debian/ bullseye nginx" > /etc/apt/sources.list.d/nginx.list && \
+    echo "deb-src [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/mainline/debian/ bullseye nginx" >> /etc/apt/sources.list.d/nginx.list && \
+    apt-get update && \
+    apt-get build-dep -y nginx && \
+    apt-get install -y nginx nginx-dbg && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY config/nginx.conf /etc/nginx/sites-available/default
 
