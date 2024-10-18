@@ -15,7 +15,7 @@ this Docker image is based on Debian and includes the ``` perf ```  utility, des
 
 start the container in a privileged mode, run:
 
-``docker run --name perf-utils --privileged -p 8080:80 -d -e ENV_VAR_NAME=value muuta/perfutils``
+``docker run --name perf-utils --privileged -p 8080:80 -d ghcr.io/triplemcoder14/perf-utils:latest``
 
 ### Accessing the Container
 
@@ -31,10 +31,10 @@ Once inside the container, you can run ``perf`` commands to probe your applicati
 
 ``perf probe -x /usr/sbin/nginx -F``
 
-
 output:
 
-![output4](https://github.com/user-attachments/assets/5c3114a6-9988-4d26-ab5e-7607ed35f10e)
+![probe](https://github.com/user-attachments/assets/f7d15387-259b-42de-a0f7-1310ddf05e43)
+
 
 2. Inspect specific function variables:
 
