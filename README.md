@@ -15,13 +15,15 @@ this Docker image is based on Debian and includes the ``` perf ```  utility, des
 
 start the container in a privileged mode, run:
 
-``docker run --name perf-utils --privileged -p 8080:80 -d ghcr.io/triplemcoder14/perf-utils:latest``
-
+```
+docker run --name perf-utils --privileged -p 8080:80 -d ghcr.io/triplemcoder14/perf-utils:latest
+```
 ### Accessing the Container
 
 create a bash shell in the running container, execute:
-
-``docker exec -it perf-utils bash``
+```
+docker exec -it perf-utils bash
+```
 
 ### Running perf Commands
 
@@ -29,7 +31,9 @@ Once inside the container, you can run ``perf`` commands to probe your applicati
 
 1. List available probes for Nginx:
 
-``perf probe -x /usr/sbin/nginx -F``
+```
+perf probe -x /usr/sbin/nginx -F
+```
 
 output:
 
@@ -38,7 +42,9 @@ output:
 
 2. Inspect specific function variables:
 
-``perf probe -x `which nginx` -V ngx_accept_log_error``
+```
+perf probe -x `which nginx` -V ngx_accept_log_error
+```
 
 output:
 
@@ -48,12 +54,5 @@ output:
 Feel free to customize this image by adding additional utilities or configurations as needed. Simply modify the Dockerfile to install any required packages or dependencies. 
 
 cheers!!! 
-
-
-
-
-
-
-
 
 
